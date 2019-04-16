@@ -9,26 +9,11 @@ let viewerInstance = null;
 let annotManager = null;
 const DOCUMENT_ID = 'webviewer-demo-1';
 
-// Replace with your ip address
-const url = 'ws://192.168.10.154:8080';
+const hostName = window.location.hostname;
+const url = `ws://${hostName}:8080`;
 const connection = new WebSocket(url);
-
-connection.onopen = () => {
-  connection.send('client message');
-}
-
 connection.onerror = error => {
   console.warn(`Error from WebSocket: ${error}`);
-}
-
-// When server broadcasts a message
-connection.onmessage = () => {
-  loadXfdfStrings(DOCUMENT_ID).then((rows) => {
-    JSON.parse(rows).forEach(row => {
-      const annotations = annotManager.importAnnotCommand(row.xfdfString);
-      annotManager.drawAnnotationsFromList(annotations);
-    });
-  });
 }
 
 // We need to wait for the viewer to be ready before we can use any APIs
@@ -40,11 +25,20 @@ viewerElement.addEventListener('ready', function() {
       return;
     } else {
       const xfdfStrings = annotManager.getAnnotCommand();
-      annotations.forEach(annotation => {
-        saveXfdfString(DOCUMENT_ID, annotation.Id, xfdfStrings);
+      annotations.forEach((annotation, i) => {
+        setTimeout(()=>{connection.send(convertXfdfString(DOCUMENT_ID, annotation.Id, xfdfStrings));
+        },i*1000);
       });
     }
   });
+
+  connection.onmessage = (message) => {
+    const currentAnnotationList = annotManager.getSelectedAnnotations();
+    const annotation = JSON.parse(message.data);
+    const annotations = annotManager.importAnnotCommand(annotation.xfdfString);
+    annotManager.drawAnnotationsFromList(annotations);
+    annotManager.selectAnnotations(currentAnnotationList);
+  }
 });
 
 viewerElement.addEventListener('documentLoaded', () => {
@@ -56,24 +50,13 @@ viewerElement.addEventListener('documentLoaded', () => {
   });
 });
 
-
-const saveXfdfString = (documentId, annotationId, xfdfString) => {
-  return new Promise((resolve, reject) => {
-    fetch(`/server/annotationHandler.js?documentId=${documentId}`, {
-      method: 'POST',
-      body: JSON.stringify({
-        annotationId,
-        xfdfString
-      }),
-    }).then((res) => {
-      if (res.status < 400) {
-        resolve(res);
-      } else {
-        reject(res);
-      }
-    });
+const convertXfdfString = (documentId, annotationId, xfdfString) => {
+  return JSON.stringify({
+    documentId,
+    annotationId,
+    xfdfString
   });
-};
+}
 
 const loadXfdfStrings = (documentId) => {
   return new Promise((resolve, reject) => {
@@ -89,4 +72,4 @@ const loadXfdfStrings = (documentId) => {
       }
     });
   });
-}
+};

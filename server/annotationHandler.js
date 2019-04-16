@@ -6,8 +6,11 @@ const sqlite3 = require('sqlite3').verbose();
 const TABLE = 'annotations';
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: 8080 });
+const DOCUMENT_ID = 'webviewer-demo-1';
 
 module.exports = (app) => {
+  
+  // Create and initialize database
   if (!fs.existsSync('server/xfdf.db')) { 
     fs.writeFileSync('server/xfdf.db', '');
   }
@@ -16,31 +19,30 @@ module.exports = (app) => {
     db.run(`CREATE TABLE IF NOT EXISTS ${TABLE} (documentId TEXT, annotationId TEXT PRIMARY KEY, xfdfString TEXT)`);
   });
   db.close();
-  wss.on('connection', ws => {
-    app.post('/server/annotationHandler.js', (req, res) => {
-      const documentId = req.query.documentId;
-      const annotationId = JSON.parse(req.body).annotationId;
-      const xfdfString = JSON.parse(req.body).xfdfString.replace(/\'/g, `''`);
+
+  // Connection to WebSocket server
+  wss.on('connection', ws => {    
+    ws.on('message', message => {
       const db = new sqlite3.Database('./xfdf.db');
+      const documentId = JSON.parse(message).documentId;
+      const annotationId = JSON.parse(message).annotationId;
+      const xfdfString = JSON.parse(message).xfdfString.replace(/\'/g, `''`);
+      const isDeleteCommand = xfdfString.includes('<delete>');
+      console.log(isDeleteCommand);
       db.serialize(() => {
         db.run(`INSERT OR REPLACE INTO ${TABLE} VALUES ('${documentId}', '${annotationId}', '${xfdfString}')`, error => {  
           if (error) {
-            res.status(500).end();
-          } else {
-            res.status(200).end();
+            console.warn(`Error occurred saving annotations to database: ${JSON.stringify(error)}`);
           }
         });
       });
       db.close();
-      res.end();
-
-      // Broadcast to clients through WebSocket
       wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send();
+        if (client.readyState === WebSocket.OPEN && ws !== client) {
+          client.send(message);
         } 
       });
-    });
+    })
   });
 
   app.get('/server/annotationHandler.js', (req,res) => {
@@ -58,3 +60,7 @@ module.exports = (app) => {
     db.close();
   });
 }
+
+// assign random names to users 
+// when deleting, delete children first
+// open the left panel automatically
