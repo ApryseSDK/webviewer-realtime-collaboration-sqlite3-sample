@@ -1,17 +1,23 @@
 {
-  "name": "real-time-sample",
+  "name": "webviewer-realtime-collaboration-sqlite3-sample",
   "version": "1.0.0",
-  "description": "",
+  "description": "WebViewer sample to show how you can create a real time collaboration app with WebViewer using WebSocket, SQLite3, and Node.js server.",
   "main": "client/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npm run download-webviewer && npm run add-license",
+    "download-webviewer": "node scripts/download-webviewer.js",
+    "add-license": "node scripts/add-license.js",
     "start": "node server/server.js"
   },
-  "author": "",
+  "author": "PDFTron Systems Inc.",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
+    "btoa": "^1.2.1",
+    "download": "^7.1.0",
+    "fs-extra": "^7.0.1",
+    "open": "^6.1.0",
     "sqlite3": "^4.0.6",
     "ws": "^6.2.1"
   }
