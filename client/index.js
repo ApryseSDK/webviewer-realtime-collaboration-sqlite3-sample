@@ -3,41 +3,45 @@ const myWebViewer = new PDFTron.WebViewer({
   path: 'lib', // path to the PDFTron 'lib' folder on your server
   l: atob(window.licenseKey),
   initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/webviewer-demo.pdf',
-  // initialDoc: '/path/to/my/file.pdf',  // You can also use documents on your server
 }, viewerElement);
-let viewerInstance = null;
 let annotManager = null;
 const DOCUMENT_ID = 'webviewer-demo-1';
-
 const hostName = window.location.hostname;
 const url = `ws://${hostName}:8080`;
 const connection = new WebSocket(url);
+const nameList = ['Andy','Andrew','Logan', 'Justin', 'Matt', 'Sardor', 'Zhijie', 'James', 'Kristian', 'Mary', 'Patricia', 'Jennifer', 'Linda', 'David', 'Joseph', 'Thomas', 'Naman', 'Nancy', 'Sandra'];
+
 connection.onerror = error => {
   console.warn(`Error from WebSocket: ${error}`);
 }
 
 // We need to wait for the viewer to be ready before we can use any APIs
-viewerElement.addEventListener('ready', function() {
-  var viewerInstance = myWebViewer.getInstance(); // instance is ready here
+viewerElement.addEventListener('ready', () => {
+  const viewerInstance = myWebViewer.getInstance(); 
+  // Instance is ready here
+  viewerInstance.openElements(['leftPanel']);
   annotManager = viewerInstance.docViewer.getAnnotationManager();
+  // Assign a random name to client
+  annotManager.setCurrentUser(nameList[Math.floor(Math.random()*nameList.length)]);
   annotManager.on('annotationChanged', (e, annotations) => {
+    // If annotation change is from import, return 
     if (e.imported) {
       return;
-    } else {
-      const xfdfStrings = annotManager.getAnnotCommand();
-      annotations.forEach((annotation, i) => {
-        setTimeout(()=>{connection.send(convertXfdfString(DOCUMENT_ID, annotation.Id, xfdfStrings));
-        },i*1000);
-      });
     }
+    const xfdfString = annotManager.getAnnotCommand();
+    annotations.forEach(annotation => {
+      connection.send(JSON.stringify({
+        documentId: DOCUMENT_ID,
+        annotationId: annotation.Id,
+        xfdfString
+      }));
+    });
   });
 
   connection.onmessage = (message) => {
-    const currentAnnotationList = annotManager.getSelectedAnnotations();
     const annotation = JSON.parse(message.data);
     const annotations = annotManager.importAnnotCommand(annotation.xfdfString);
     annotManager.drawAnnotationsFromList(annotations);
-    annotManager.selectAnnotations(currentAnnotationList);
   }
 });
 
@@ -49,14 +53,6 @@ viewerElement.addEventListener('documentLoaded', () => {
     });
   });
 });
-
-const convertXfdfString = (documentId, annotationId, xfdfString) => {
-  return JSON.stringify({
-    documentId,
-    annotationId,
-    xfdfString
-  });
-}
 
 const loadXfdfStrings = (documentId) => {
   return new Promise((resolve, reject) => {
