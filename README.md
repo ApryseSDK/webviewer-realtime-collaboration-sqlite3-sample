@@ -19,7 +19,7 @@ Before you begin, make sure your development environment includes [Node.js](http
 
 ```
 git clone https://github.com/PDFTron/webviewer-real-time-collaboration-sqlite3-sample.git
-cd webviewer-real-time-collaboration-sqlite3-sample.git
+cd webviewer-realtime-collaboration-sqlite3-sample.git
 npm install
 ```
 
