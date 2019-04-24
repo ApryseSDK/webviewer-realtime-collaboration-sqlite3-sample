@@ -1,6 +1,3 @@
-// WARNING: In this sample, the query inputs are not sanitized. For production use, you should use sql builder
-// libraries like Knex.js (https://knexjs.org/) to prevent SQL injection.
-
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const TABLE = 'annotations';
@@ -25,12 +22,10 @@ module.exports = (app) => {
       const documentId = JSON.parse(message).documentId;
       const annotationId = JSON.parse(message).annotationId;
       const xfdfString = JSON.parse(message).xfdfString.replace(/\'/g, `''`);
+      // Prepare statement to sanitize input
+      let statement = db.prepare(`INSERT OR REPLACE INTO annotations VALUES (?, ?, ?)`);
       db.serialize(() => {
-        db.run(`INSERT OR REPLACE INTO ${TABLE} VALUES ('${documentId}', '${annotationId}', '${xfdfString}')`, error => {  
-          if (error) {
-            console.warn(`Error occurred saving annotations to database: ${JSON.stringify(error)}`);
-          }
-        });
+        statement.run(documentId, annotationId, xfdfString);
       });
       wss.clients.forEach((client) => {
         // Broadcast to every client except for the client where the message came from
