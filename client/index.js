@@ -1,7 +1,6 @@
 const viewerElement = document.getElementById('viewer');
 const myWebViewer = new PDFTron.WebViewer({
-  path: 'lib', // path to the PDFTron 'lib' folder on your server
-  l: atob(window.licenseKey),
+  path: 'lib', // path to the PDFTron 'lib' folder
   initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/webviewer-demo.pdf',
 }, viewerElement);
 let annotManager = null;
