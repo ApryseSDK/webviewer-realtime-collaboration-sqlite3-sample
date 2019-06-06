@@ -9,7 +9,6 @@
     "start": "node server/server.js"
   },
   "author": "PDFTron Systems Inc.",
-  "license": "ISC",
   "dependencies": {
     "@pdftron/webviewer-downloader": "^1.0.7",
     "body-parser": "^1.18.3",
