@@ -1,8 +1,5 @@
 const viewerElement = document.getElementById('viewer');
-const myWebViewer = new PDFTron.WebViewer({
-  path: 'lib', // path to the PDFTron 'lib' folder
-  initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/webviewer-demo.pdf',
-}, viewerElement);
+
 let annotManager = null;
 const DOCUMENT_ID = 'webviewer-demo-1';
 const hostName = window.location.hostname;
@@ -14,16 +11,19 @@ connection.onerror = error => {
   console.warn(`Error from WebSocket: ${error}`);
 }
 
-// We need to wait for the viewer to be ready before we can use any APIs
-viewerElement.addEventListener('ready', () => {
-  const viewerInstance = myWebViewer.getInstance(); 
+
+WebViewer({
+  path: 'lib', // path to the PDFTron 'lib' folder
+  initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/webviewer-demo.pdf',
+}, viewerElement).then( instance => {
+
   // Instance is ready here
-  viewerInstance.openElements(['leftPanel']);
-  annotManager = viewerInstance.docViewer.getAnnotationManager();
+  instance.openElements(['leftPanel']);
+  annotManager = instance.docViewer.getAnnotationManager();
   // Assign a random name to client
   annotManager.setCurrentUser(nameList[Math.floor(Math.random()*nameList.length)]);
   annotManager.on('annotationChanged', (e, annotations) => {
-    // If annotation change is from import, return 
+    // If annotation change is from import, return
     if (e.imported) {
       return;
     }
