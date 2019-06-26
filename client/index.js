@@ -6,6 +6,7 @@ const hostName = window.location.hostname;
 const url = `ws://${hostName}:8080`;
 const connection = new WebSocket(url);
 const nameList = ['Andy','Andrew','Logan', 'Justin', 'Matt', 'Sardor', 'Zhijie', 'James', 'Kristian', 'Mary', 'Patricia', 'Jennifer', 'Linda', 'David', 'Joseph', 'Thomas', 'Naman', 'Nancy', 'Sandra'];
+const serializer = new XMLSerializer();
 
 connection.onerror = error => {
   console.warn(`Error from WebSocket: ${error}`);
@@ -28,12 +29,22 @@ WebViewer({
       return;
     }
     const xfdfString = annotManager.getAnnotCommand();
-    annotations.forEach(annotation => {
-      connection.send(JSON.stringify({
-        documentId: DOCUMENT_ID,
-        annotationId: annotation.Id,
-        xfdfString
-      }));
+    const parser = new DOMParser();
+    const commandData = parser.parseFromString(xfdfString, 'text/xml');
+    const addedAnnots = commandData.getElementsByTagName('add')[0];
+    const modifiedAnnots = commandData.getElementsByTagName('modify')[0];
+    const deletedAnnots = commandData.getElementsByTagName('delete')[0];
+
+    addedAnnots.childNodes.forEach((child) => {
+      sendAnnotationChange(child, 'add');
+    });
+
+    modifiedAnnots.childNodes.forEach((child) => {
+      sendAnnotationChange(child, 'modify');
+    });
+    
+    deletedAnnots.childNodes.forEach((child) => {
+      sendAnnotationChange(child, 'delete');
     });
   });
 
@@ -68,3 +79,27 @@ const loadXfdfStrings = (documentId) => {
     });
   });
 };
+
+const convertToXfdf = (changedAnnotation, action) => {
+  let xfdfString = `<?xml version="1.0" encoding="UTF-8" ?><xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve"><fields />`;
+  if (action === 'add') {
+    xfdfString += `<add>${changedAnnotation}</add><modify /><delete />`;
+  } else if (action === 'modify') {
+    xfdfString += `<add /><modify>${changedAnnotation}</modify><delete />`;
+  } else if (action === 'delete') {
+    xfdfString += `<add /><modify /><delete>${changedAnnotation}</delete>`;
+  }
+  xfdfString += `</xfdf>`;
+  return xfdfString;
+}
+
+const sendAnnotationChange = (annotation, action) => {
+  if (annotation.nodeType !== 3) {
+    const annotationString = serializer.serializeToString(annotation);
+    connection.send(JSON.stringify({
+      documentId: DOCUMENT_ID,
+      annotationId: annotation.getAttribute('name'),
+      xfdfString: convertToXfdf(annotationString, action)
+    }));
+  }
+}
