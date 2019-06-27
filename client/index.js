@@ -5,7 +5,7 @@ const DOCUMENT_ID = 'webviewer-demo-1';
 const hostName = window.location.hostname;
 const url = `ws://${hostName}:8080`;
 const connection = new WebSocket(url);
-const nameList = ['Andy','Andrew','Logan', 'Justin', 'Matt', 'Sardor', 'Zhijie', 'James', 'Kristian', 'Mary', 'Patricia', 'Jennifer', 'Linda', 'David', 'Joseph', 'Thomas', 'Naman', 'Nancy', 'Sandra'];
+const nameList = ['Andy', 'Andrew', 'Logan', 'Justin', 'Matt', 'Sardor', 'Zhijie', 'James', 'Kristian', 'Mary', 'Patricia', 'Jennifer', 'Linda', 'David', 'Joseph', 'Thomas', 'Naman', 'Nancy', 'Sandra'];
 const serializer = new XMLSerializer();
 
 connection.onerror = error => {
@@ -23,26 +23,31 @@ WebViewer({
   annotManager = instance.docViewer.getAnnotationManager();
   // Assign a random name to client
   annotManager.setCurrentUser(nameList[Math.floor(Math.random()*nameList.length)]);
-  annotManager.on('annotationChanged', (e, annotations) => {
+  annotManager.on('annotationChanged', e => {
     // If annotation change is from import, return
     if (e.imported) {
       return;
     }
+
     const xfdfString = annotManager.getAnnotCommand();
+    // Parse xfdfString to separate multiple annotation changes to individual annotation change
     const parser = new DOMParser();
     const commandData = parser.parseFromString(xfdfString, 'text/xml');
     const addedAnnots = commandData.getElementsByTagName('add')[0];
     const modifiedAnnots = commandData.getElementsByTagName('modify')[0];
     const deletedAnnots = commandData.getElementsByTagName('delete')[0];
 
+    // List of added annotations
     addedAnnots.childNodes.forEach((child) => {
       sendAnnotationChange(child, 'add');
     });
 
+    // List of modified annotations
     modifiedAnnots.childNodes.forEach((child) => {
       sendAnnotationChange(child, 'modify');
     });
     
+    // List of deleted annotations
     deletedAnnots.childNodes.forEach((child) => {
       sendAnnotationChange(child, 'delete');
     });
@@ -80,6 +85,8 @@ const loadXfdfStrings = (documentId) => {
   });
 };
 
+
+// wrapper function to convert xfdf fragments to full xfdf strings
 const convertToXfdf = (changedAnnotation, action) => {
   let xfdfString = `<?xml version="1.0" encoding="UTF-8" ?><xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve"><fields />`;
   if (action === 'add') {
@@ -93,8 +100,9 @@ const convertToXfdf = (changedAnnotation, action) => {
   return xfdfString;
 }
 
+// helper function to send annotation changes to WebSocket server
 const sendAnnotationChange = (annotation, action) => {
-  if (annotation.nodeType !== 3) {
+  if (annotation.nodeType !== annotation.TEXT_NODE) {
     const annotationString = serializer.serializeToString(annotation);
     connection.send(JSON.stringify({
       documentId: DOCUMENT_ID,
