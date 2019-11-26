@@ -36,6 +36,10 @@ npm start
 - See the changes being applied in real time in other windows
 - You can access the real time server from a different device in the same network via replacing `localhost` in your URL to the server's IP address.
 
+## Related resources
+
+If you are also using PDFTron's Android SDK, you can find the corresponding Android sample that will work out-of-box with this project:[Android CollabWebSocketSample](https://github.com/PDFTron/pdftron-android-samples/tree/master/CollabWebSocketSample).
+
 ## Contributing
 
 See [contributing](./CONTRIBUTING.md).
