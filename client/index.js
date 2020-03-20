@@ -12,7 +12,6 @@ connection.onerror = error => {
   console.warn(`Error from WebSocket: ${error}`);
 }
 
-
 WebViewer({
   path: 'lib', // path to the PDFTron 'lib' folder
   initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/webviewer-demo.pdf',
