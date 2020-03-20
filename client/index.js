@@ -22,13 +22,13 @@ WebViewer({
   annotManager = instance.docViewer.getAnnotationManager();
   // Assign a random name to client
   annotManager.setCurrentUser(nameList[Math.floor(Math.random()*nameList.length)]);
-  annotManager.on('annotationChanged', e => {
+  annotManager.on('annotationChanged', async e => {
     // If annotation change is from import, return
     if (e.imported) {
       return;
     }
 
-    const xfdfString = annotManager.getAnnotCommand();
+    const xfdfString = await annotManager.exportAnnotCommand();
     // Parse xfdfString to separate multiple annotation changes to individual annotation change
     const parser = new DOMParser();
     const commandData = parser.parseFromString(xfdfString, 'text/xml');
@@ -52,18 +52,18 @@ WebViewer({
     });
   });
 
-  connection.onmessage = (message) => {
+  connection.onmessage = async (message) => {
     const annotation = JSON.parse(message.data);
-    const annotations = annotManager.importAnnotCommand(annotation.xfdfString);
-    annotManager.drawAnnotationsFromList(annotations);
+    const annotations = await annotManager.importAnnotCommand(annotation.xfdfString);
+    await annotManager.drawAnnotationsFromList(annotations);
   }
 });
 
 viewerElement.addEventListener('documentLoaded', () => {
   loadXfdfStrings(DOCUMENT_ID).then((rows) => {
-    JSON.parse(rows).forEach(row => {
-      const annotations = annotManager.importAnnotCommand(row.xfdfString);
-      annotManager.drawAnnotationsFromList(annotations);
+    JSON.parse(rows).forEach(async row => {
+      const annotations = await annotManager.importAnnotCommand(row.xfdfString);
+      await annotManager.drawAnnotationsFromList(annotations);
     });
   });
 });
