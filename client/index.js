@@ -15,6 +15,10 @@ connection.onerror = error => {
 WebViewer({
   path: 'lib', // path to the PDFTron 'lib' folder
   initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/webviewer-demo.pdf',
+  documentXFDFRetriever: async () => {
+    const rows = await loadXfdfStrings(DOCUMENT_ID);
+    return JSON.parse(rows).map(row => row.xfdfString);
+  },
 }, viewerElement).then( instance => {
 
   // Instance is ready here
@@ -57,15 +61,6 @@ WebViewer({
     const annotations = await annotManager.importAnnotCommand(annotation.xfdfString);
     await annotManager.drawAnnotationsFromList(annotations);
   }
-});
-
-viewerElement.addEventListener('documentLoaded', () => {
-  loadXfdfStrings(DOCUMENT_ID).then((rows) => {
-    JSON.parse(rows).forEach(async row => {
-      const annotations = await annotManager.importAnnotCommand(row.xfdfString);
-      await annotManager.drawAnnotationsFromList(annotations);
-    });
-  });
 });
 
 const loadXfdfStrings = (documentId) => {
