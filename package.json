@@ -10,8 +10,8 @@
   "author": "PDFTron Systems Inc.",
   "dependencies": {
     "@pdftron/webviewer": "^7.3.0",
-    "body-parser": "^1.18.3",
-    "express": "^4.16.4",
+    "body-parser": "^1.20.1",
+    "express": "^4.18.2",
     "fs-extra": "^9.0.0",
     "open": "^6.1.0",
     "sqlite3": "^4.0.6",
