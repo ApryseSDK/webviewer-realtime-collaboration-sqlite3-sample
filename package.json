@@ -11,7 +11,7 @@
   "dependencies": {
     "@pdftron/webviewer": "^7.3.0",
     "body-parser": "^1.18.3",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "fs-extra": "^9.0.0",
     "open": "^6.1.0",
     "sqlite3": "^4.0.6",
