@@ -1,6 +1,6 @@
 const viewerElement = document.getElementById('viewer');
 
-let annotManager = null;
+let annotationManager = null;
 const DOCUMENT_ID = 'webviewer-demo-1';
 const hostName = window.location.hostname;
 const url = `ws://${hostName}:8080`;
@@ -22,17 +22,17 @@ WebViewer({
 }, viewerElement).then( instance => {
 
   // Instance is ready here
-  instance.openElements(['leftPanel']);
-  annotManager = instance.docViewer.getAnnotationManager();
+  instance.UI.openElements(['leftPanel']);
+  annotationManager = instance.Core.documentViewer.getAnnotationManager();
   // Assign a random name to client
-  annotManager.setCurrentUser(nameList[Math.floor(Math.random()*nameList.length)]);
-  annotManager.on('annotationChanged', async e => {
+  annotationManager.setCurrentUser(nameList[Math.floor(Math.random()*nameList.length)]);
+  annotationManager.addEventListener('annotationChanged', async e => {
     // If annotation change is from import, return
     if (e.imported) {
       return;
     }
 
-    const xfdfString = await annotManager.exportAnnotCommand();
+    const xfdfString = await annotationManager.exportAnnotationCommand();
     // Parse xfdfString to separate multiple annotation changes to individual annotation change
     const parser = new DOMParser();
     const commandData = parser.parseFromString(xfdfString, 'text/xml');
@@ -58,8 +58,8 @@ WebViewer({
 
   connection.onmessage = async (message) => {
     const annotation = JSON.parse(message.data);
-    const annotations = await annotManager.importAnnotCommand(annotation.xfdfString);
-    await annotManager.drawAnnotationsFromList(annotations);
+    const annotations = await annotationManager.importAnnotationCommand(annotation.xfdfString);
+    await annotationManager.drawAnnotationsFromList(annotations);
   }
 });
 
