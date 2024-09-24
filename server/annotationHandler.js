@@ -2,7 +2,7 @@ const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const TABLE = 'annotations';
 const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocket.Server({ port: 8181});
 
 module.exports = (app) => {
   
