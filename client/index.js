@@ -12,7 +12,7 @@ connection.onerror = error => {
   console.warn(`Error from WebSocket: ${error}`);
 }
 
-WebViewer({
+WebViewer.Iframe({
   path: 'lib', // path to the PDFTron 'lib' folder
   initialDoc: 'https://pdftron.s3.amazonaws.com/downloads/pl/webviewer-demo.pdf',
   documentXFDFRetriever: async () => {
@@ -49,7 +49,7 @@ WebViewer({
     modifiedAnnots.childNodes.forEach((child) => {
       sendAnnotationChange(child, 'modify');
     });
-    
+
     // List of deleted annotations
     deletedAnnots.childNodes.forEach((child) => {
       sendAnnotationChange(child, 'delete');
