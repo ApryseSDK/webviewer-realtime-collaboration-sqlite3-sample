@@ -7,19 +7,19 @@
 
 This is a WebViewer sample to show how you can construct a real time collaboration server for WebViewer through `WebSocket`, `SQLite3`, and `Node.js` server.
 
-The below diagram depicts the structure of the real time collaboration sample app. 
+The below diagram depicts the structure of the real time collaboration sample app.
 
 ![Structure](/real-time-structure.png "Structure")
 
 
 ## Initial setup
 
-Before you begin, make sure your development environment includes [Node.js](https://nodejs.org/en/).
+Before you begin, make sure your development environment includes [Node.js](https://nodejs.org/en/). This sample requires version 13 of Node.js.
 
 ## Install
 
 ```
-git clone https://github.com/PDFTron/webviewer-realtime-collaboration-sqlite3-sample.git
+git clone https://github.com/ApryseSDK/webviewer-realtime-collaboration-sqlite3-sample.git
 cd webviewer-realtime-collaboration-sqlite3-sample
 npm install
 ```
@@ -48,7 +48,7 @@ const url = `ws://${hostName}:8181`;
 ## How to use
 
 - Run a WebViewer instance with the `npm start` command. An instance of the WebViewer will run on [port 3000](http://localhost:3000/index.html) using your default browser.
-- Open up two other browsers, one in incognito mode and another separate instance using a different major browser, all listening to [port 3000](http://localhost:3000/index.html). 
+- Open up two other browsers, one in incognito mode and another separate instance using a different major browser, all listening to [port 3000](http://localhost:3000/index.html).
 - Create annotations with the annotations tools on one of the browsers, and observe the annotations appear on the other two browsers in real time.
 - You can also access the real time server from a different device in the same network via replacing `localhost` in your URL to the server's IP address.
 
@@ -58,7 +58,7 @@ const url = `ws://${hostName}:8181`;
 
 ## Related resources
 
-If you are also using PDFTron's Android SDK, you can find the corresponding Android sample that will work out-of-box with this project: [Android CollabWebSocketSample](https://github.com/PDFTron/pdftron-android-samples/tree/master/CollabWebSocketSample).
+If you are also using PDFTron's Android SDK, you can find the corresponding Android sample that will work out-of-box with this project: [Android CollabWebSocketSample](https://github.com/ApryseSDK/pdftron-android-samples/tree/master/CollabWebSocketSample).
 
 ## WebViewer APIs
 
