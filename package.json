@@ -7,9 +7,9 @@
     "postinstall": "node tools/copy-webviewer-files.js",
     "start": "node server/server.js"
   },
-  "author": "PDFTron Systems Inc.",
+  "author": "Apryse Systems Inc.",
   "dependencies": {
-    "@pdftron/webviewer": "^10.5.1",
+    "@pdftron/webviewer": "^11.0.0",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "fs-extra": "^9.0.0",
